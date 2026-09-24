@@ -1,5 +1,7 @@
 # Receiving API Contract: Health Records
 
+The machine-readable OpenAPI 3.0 contract is maintained at [`docs/health-records-api.openapi.yaml`](../../../docs/health-records-api.openapi.yaml).
+
 **Purpose**: Versioned client contract for submitting received and changed health records to the configured API.  
 **Transport**: HTTPS `POST` in production.  
 **Default path**: `/v1/health-records` (configurable through `ApiConfiguration`).  

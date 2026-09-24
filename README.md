@@ -50,6 +50,14 @@ dart run tool/mock_health_api.dart --port 8787
 
 For a USB-connected Android device, run `adb reverse tcp:8787 tcp:8787`, launch the debug app with `--dart-define=HEALTH_USE_FAKE_SOURCE=true --dart-define=HEALTH_API_BASE_URL=http://127.0.0.1:8787`, and save the development credential `dev-credential` from the in-app key dialog. The local mock server must never be paired with the real Health Connect source; use an HTTPS staging service for real-source testing. See [`docs/mock-api.md`](docs/mock-api.md) for request examples and failure scenarios.
 
+## Architecture diagram
+
+The interactive Archify architecture map is available at [`docs/flutter-stats-architecture.html`](docs/flutter-stats-architecture.html), with its typed source at [`docs/flutter-stats-architecture.json`](docs/flutter-stats-architecture.json).
+
+## API contract
+
+The Go service contract is documented in [`docs/health-records-api.openapi.yaml`](docs/health-records-api.openapi.yaml). It reflects the current Flutter wire format, including separate upsert/delete requests, idempotency headers, acknowledgements, and the one-record-per-request behavior of the current client.
+
 ## Validate
 
 ```sh
