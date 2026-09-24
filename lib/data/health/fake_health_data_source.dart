@@ -19,6 +19,8 @@ class FakeHealthDataSource implements HealthDataSource {
   final List<SourceChange> _changes;
   int readCount = 0;
   int permissionRequestCount = 0;
+  List<String>? lastInitialRecordTypes;
+  List<String>? lastChangeRecordTypes;
 
   @override
   Future<HealthAvailability> checkAvailability() async =>
@@ -85,6 +87,7 @@ class FakeHealthDataSource implements HealthDataSource {
     required List<String> recordTypes,
   }) async {
     readCount++;
+    lastInitialRecordTypes = List<String>.of(recordTypes);
     if (!granted) throw StateError('Permission denied');
     final records = _records
         .where((record) {
@@ -108,6 +111,7 @@ class FakeHealthDataSource implements HealthDataSource {
     required List<String> recordTypes,
   }) async {
     readCount++;
+    lastChangeRecordTypes = List<String>.of(recordTypes);
     if (!granted) throw StateError('Permission denied');
     final changes = _changes
         .where((change) => recordTypes.contains(change.identity.recordType))

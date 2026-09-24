@@ -23,7 +23,7 @@ class ConnectionActions extends StatelessWidget {
           icon: const Icon(Icons.settings_outlined),
           label: const Text('Open settings'),
         ),
-        if (controller.snapshot?.state.name == 'connected')
+        if (controller.snapshot?.canRead == true)
           TextButton.icon(
             onPressed: controller.busy ? null : controller.disconnect,
             icon: const Icon(Icons.link_off),

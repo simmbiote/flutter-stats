@@ -119,7 +119,7 @@ class _ConnectionPageState extends ConsumerState<ConnectionPage> {
                   : () => _showRationale(controller),
               icon: const Icon(Icons.health_and_safety_outlined),
               label: Text(
-                controller.snapshot?.state == ConnectionState.connected
+                controller.snapshot?.canRead == true
                     ? 'Review read permissions'
                     : 'Review and grant access',
               ),

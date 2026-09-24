@@ -177,6 +177,25 @@ void main() {
     expect(await store.countPending(), 0);
   });
 
+  test('syncs only categories granted by a partial permission set', () async {
+    final source = _PartialPermissionSource(records: [record]);
+    final store = InMemoryPendingStore();
+    final api = FakeReceivingApi();
+    final coordinator = SyncCoordinator(
+      source: source,
+      store: store,
+      api: api,
+      clock: FixedClock(now),
+      ids: SequentialIdGenerator(),
+    );
+
+    final result = await coordinator.run(trigger: 'partial-test');
+
+    expect(result.receiveState, SyncReceiveState.complete);
+    expect(source.lastInitialRecordTypes, ['steps']);
+    expect(api.submitted, hasLength(1));
+  });
+
   test('does not read while permissions are denied', () async {
     final source = FakeHealthDataSource(granted: false, records: [record]);
     final store = InMemoryPendingStore();
@@ -194,4 +213,20 @@ void main() {
     expect(source.readCount, 0);
     expect(api.submitted, isEmpty);
   });
+}
+
+class _PartialPermissionSource extends FakeHealthDataSource {
+  _PartialPermissionSource({required List<HealthRecordSnapshot> records})
+    : super(granted: true, records: records);
+
+  @override
+  Future<ConnectionSnapshot> getPermissionSnapshot({
+    List<String>? recordTypes,
+  }) async {
+    return const ConnectionSnapshot(
+      state: ConnectionState.partiallyAllowed,
+      availability: HealthAvailability.available,
+      permissions: {'steps': PermissionStatus.granted},
+    );
+  }
 }

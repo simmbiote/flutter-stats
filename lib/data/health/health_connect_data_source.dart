@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/errors/health_errors.dart';
 import '../../features/sync/domain/models.dart';
 import 'health_data_source.dart';
+import 'activity_recognition_permission.dart';
 import 'permission_catalog.dart';
 import 'source_origin_mapper.dart';
 
@@ -14,13 +15,17 @@ class HealthConnectDataSource implements HealthDataSource {
     Health? health,
     PermissionCatalog catalog = const PermissionCatalog(),
     SourceOriginMapper originMapper = const SourceOriginMapper(),
+    ActivityRecognitionPermission activityRecognitionPermission =
+        const ActivityRecognitionPermission(),
   }) : _health = health ?? Health(),
        _catalog = catalog,
-       _originMapper = originMapper;
+       _originMapper = originMapper,
+       _activityRecognitionPermission = activityRecognitionPermission;
 
   final Health _health;
   final PermissionCatalog _catalog;
   final SourceOriginMapper _originMapper;
+  final ActivityRecognitionPermission _activityRecognitionPermission;
   final Map<String, String> _recordTypesById = {};
   bool _configured = false;
 
@@ -116,10 +121,11 @@ class HealthConnectDataSource implements HealthDataSource {
     }
     final descriptors = _selectedDescriptors(recordTypes);
     final types = descriptors
-        .expand((item) => item.healthTypes)
+        .expand((item) => item.typesToRequest)
         .toSet()
-        .toList();
+        .toList(growable: false);
     try {
+      await _activityRecognitionPermission.request();
       await _health.requestAuthorization(
         types,
         permissions: List<HealthDataAccess>.filled(
@@ -243,7 +249,7 @@ class HealthConnectDataSource implements HealthDataSource {
   ) async {
     try {
       var allGranted = true;
-      for (final type in descriptor.healthTypes) {
+      for (final type in descriptor.typesToRequest) {
         if (!_health.isDataTypeAvailable(type)) {
           return PermissionStatus.unavailable;
         }

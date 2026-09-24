@@ -7,6 +7,7 @@ class PermissionDescriptor {
     required this.recordType,
     required this.category,
     required this.healthTypes,
+    this.permissionTypes = const <HealthDataType>[],
     required this.label,
     required this.description,
   });
@@ -14,8 +15,12 @@ class PermissionDescriptor {
   final String recordType;
   final HealthCategory category;
   final List<HealthDataType> healthTypes;
+  final List<HealthDataType> permissionTypes;
   final String label;
   final String description;
+
+  List<HealthDataType> get typesToRequest =>
+      permissionTypes.isEmpty ? healthTypes : permissionTypes;
 }
 
 class PermissionCatalog {
@@ -32,7 +37,7 @@ class PermissionCatalog {
     PermissionDescriptor(
       recordType: 'distance',
       category: HealthCategory.activity,
-      healthTypes: [HealthDataType.DISTANCE_WALKING_RUNNING],
+      healthTypes: [HealthDataType.DISTANCE_DELTA],
       label: 'Distance',
       description: 'Walking and running distance.',
     ),
@@ -46,7 +51,14 @@ class PermissionCatalog {
     PermissionDescriptor(
       recordType: 'exercise_session',
       category: HealthCategory.activity,
-      healthTypes: [HealthDataType.EXERCISE_TIME, HealthDataType.WORKOUT],
+      healthTypes: [HealthDataType.WORKOUT],
+      // The health plugin enriches workout points with these related records.
+      permissionTypes: [
+        HealthDataType.WORKOUT,
+        HealthDataType.DISTANCE_DELTA,
+        HealthDataType.STEPS,
+        HealthDataType.TOTAL_CALORIES_BURNED,
+      ],
       label: 'Exercise sessions',
       description: 'Exercise and workout sessions.',
     ),
@@ -146,7 +158,7 @@ class PermissionCatalog {
     for (final recordType in recordTypes) {
       final descriptor = byRecordType(recordType);
       if (descriptor != null) {
-        result.addAll(descriptor.healthTypes);
+        result.addAll(descriptor.typesToRequest);
       }
     }
     return result.toSet().toList(growable: false);

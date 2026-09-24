@@ -93,6 +93,7 @@ enum SyncErrorCategory {
   cursorExpired,
   invalidData,
   missingCredential,
+  notConfigured,
   authorization,
   validation,
   malformedResponse,
@@ -478,7 +479,9 @@ class ConnectionSnapshot {
   final DateTime? updatedAt;
   final SyncErrorCategory? safeErrorCategory;
 
-  bool get canRead => state == ConnectionState.connected;
+  bool get canRead =>
+      state == ConnectionState.connected ||
+      state == ConnectionState.partiallyAllowed;
 
   Map<String, dynamic> toJson() => {
     'state': state.name,

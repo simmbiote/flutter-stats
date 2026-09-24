@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:flutter_stats/data/health/fake_health_data_source.dart';
+import 'package:flutter_stats/data/health/permission_catalog.dart';
 import 'package:flutter_stats/features/sync/domain/models.dart';
 
 void main() {
@@ -14,6 +15,18 @@ void main() {
     expect(connected.state, ConnectionState.connected);
     expect(connected.permissions['steps'], PermissionStatus.granted);
     expect(connected.permissions['sleep'], PermissionStatus.granted);
+  });
+
+  test('Android permission catalog uses adapter-supported types', () {
+    const catalog = PermissionCatalog();
+    final distance = catalog.byRecordType('distance')!;
+    final exercise = catalog.byRecordType('exercise_session')!;
+    expect(distance.healthTypes.single.name, 'DISTANCE_DELTA');
+    expect(exercise.healthTypes.single.name, 'WORKOUT');
+    expect(
+      exercise.typesToRequest.map((type) => type.name),
+      containsAll(['WORKOUT', 'TOTAL_CALORIES_BURNED']),
+    );
   });
 
   test('empty source data is not interpreted as granted permission', () async {

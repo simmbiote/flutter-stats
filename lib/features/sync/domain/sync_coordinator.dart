@@ -95,24 +95,60 @@ class SyncCoordinator {
 
       final cursors = await store.readCursors();
       final allRecordTypes = catalog.recordTypes;
-      SourceReadResult readResult;
-      if (cursors.isEmpty) {
-        final end = clock.nowUtc();
-        readResult = await source.readInitialWindow(
-          start: end.subtract(const Duration(days: 30)),
-          end: end,
-          recordTypes: allRecordTypes,
+      final readableRecordTypes =
+          connection.state == ConnectionState.partiallyAllowed
+          ? allRecordTypes
+                .where(
+                  (recordType) =>
+                      connection.permissions[recordType] ==
+                      PermissionStatus.granted,
+                )
+                .toList(growable: false)
+          : allRecordTypes;
+      if (readableRecordTypes.isEmpty) {
+        publish(
+          snapshot.copyWith(
+            receiveState: SyncReceiveState.blocked,
+            sendState: SyncSendState.blocked,
+            safeErrorCategory: SyncErrorCategory.permissionDenied,
+            finishedAt: clock.nowUtc(),
+            pendingCount: await store.countPending(),
+          ),
         );
-        final operations = readResult.records.map(_operationForRecord).toList();
-        await store.enqueueAll(operations);
-      } else {
-        readResult = await source.readChanges(
-          cursors: cursors,
-          recordTypes: allRecordTypes,
-        );
-        final operations = readResult.changes.map(_operationForChange).toList();
-        await store.enqueueAll(operations);
+        await _saveRun(snapshot);
+        return snapshot;
       }
+      final end = clock.nowUtc();
+      final initialRecordTypes = readableRecordTypes
+          .where((recordType) => !cursors.containsKey(recordType))
+          .toList(growable: false);
+      final changeRecordTypes = readableRecordTypes
+          .where((recordType) => cursors.containsKey(recordType))
+          .toList(growable: false);
+      final initialResult = initialRecordTypes.isEmpty
+          ? const SourceReadResult()
+          : await source.readInitialWindow(
+              start: end.subtract(const Duration(days: 30)),
+              end: end,
+              recordTypes: initialRecordTypes,
+            );
+      final changeResult = changeRecordTypes.isEmpty
+          ? const SourceReadResult()
+          : await source.readChanges(
+              cursors: cursors,
+              recordTypes: changeRecordTypes,
+            );
+      final readResult = SourceReadResult(
+        records: initialResult.records,
+        changes: changeResult.changes,
+        cursors: {...initialResult.cursors, ...changeResult.cursors},
+        tokenExpired: initialResult.tokenExpired || changeResult.tokenExpired,
+      );
+      final operations = [
+        ...readResult.records.map(_operationForRecord),
+        ...readResult.changes.map(_operationForChange),
+      ];
+      await store.enqueueAll(operations);
       final mergedCursors = cursorRecovery.recoveredCursors(
         cursors,
         readResult,

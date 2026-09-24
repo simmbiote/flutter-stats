@@ -15,6 +15,7 @@ class ConnectionController extends ChangeNotifier {
     required this.statusController,
     this.catalog = const PermissionCatalog(),
     this.clock = const SystemClock(),
+    this.enableAutomaticSync = true,
   });
 
   final HealthDataSource source;
@@ -23,6 +24,7 @@ class ConnectionController extends ChangeNotifier {
   final SyncStatusController statusController;
   final PermissionCatalog catalog;
   final Clock clock;
+  final bool enableAutomaticSync;
 
   ConnectionSnapshot? snapshot;
   bool busy = false;
@@ -57,7 +59,7 @@ class ConnectionController extends ChangeNotifier {
       snapshot = value;
       await store.saveConnection(value);
       statusController.updateConnection(value);
-      if (value.state == ConnectionState.connected) {
+      if (enableAutomaticSync && value.canRead) {
         await scheduler.schedulePeriodic();
         await scheduler.scheduleImmediate(reason: 'permission_granted');
       }

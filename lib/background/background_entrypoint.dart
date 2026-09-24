@@ -1,8 +1,7 @@
-import 'package:flutter/widgets.dart' hide ConnectionState;
+import 'package:flutter/widgets.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../app/dependencies.dart';
-import '../features/sync/domain/models.dart';
 
 @pragma('vm:entry-point')
 void callbackDispatcher() {
@@ -12,8 +11,7 @@ void callbackDispatcher() {
     try {
       dependencies = await AppDependencies.create();
       await dependencies.connectionController.refresh();
-      if (dependencies.connectionController.snapshot?.state ==
-          ConnectionState.connected) {
+      if (dependencies.connectionController.snapshot?.canRead == true) {
         await dependencies.runSync(
           trigger: inputData?['trigger'] == 'periodic'
               ? 'background_periodic'

@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart' hide ConnectionState;
 
-import '../../features/sync/domain/models.dart';
 import '../dependencies.dart';
 
 class AppLifecycleObserver with WidgetsBindingObserver {
@@ -20,8 +19,7 @@ class AppLifecycleObserver with WidgetsBindingObserver {
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state != AppLifecycleState.resumed) return;
     await dependencies.connectionController.refresh();
-    if (dependencies.connectionController.snapshot?.state ==
-        ConnectionState.connected) {
+    if (dependencies.connectionController.snapshot?.canRead == true) {
       await dependencies.runSync(trigger: 'resume');
     }
   }
