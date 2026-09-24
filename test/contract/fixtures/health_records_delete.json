@@ -1,0 +1,13 @@
+{
+  "schema_version": "1",
+  "source_platform": "android_health_connect",
+  "operation": "delete",
+  "records": [
+    {
+      "record_id": "fixture-steps-1",
+      "source_platform": "android_health_connect",
+      "record_type": "steps",
+      "mutation_id": "android_health_connect|fixture-steps-1|steps|delete|deleted"
+    }
+  ]
+}
