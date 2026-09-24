@@ -20,15 +20,14 @@ From the repository root:
 flutter create --project-name flutter_stats --org com.example --platforms=android,ios .
 flutter pub add health:^13.3.2
 flutter pub add workmanager:^0.10.10
-flutter pub add flutter_riverpod:^3.4.3
+flutter pub add 'flutter_riverpod:>=3.3.2 <3.4.0'
 flutter pub add dio:^5.11.1
-flutter pub add drift:^2.35.0 drift_flutter:^0.3.1
+flutter pub add 'drift:>=2.34.0 <2.35.0' drift_flutter:^0.3.1
 flutter pub add flutter_secure_storage:^11.2.0
 flutter pub add cryptography:^2.9.0 cryptography_flutter:^2.3.4
-flutter pub add permission_handler:^13.0.2
 flutter pub add url_launcher:^6.3.2
 flutter pub add path_provider:^2.1.6
-flutter pub add --dev drift_dev:^2.35.0 build_runner:^2.16.1 flutter_lints:^6.0.0 mocktail:^1.0.0
+flutter pub add --dev 'drift_dev:>=2.34.0 <2.35.0' 'build_runner:>=2.15.1 <2.16.0' flutter_lints:^6.0.0 mocktail:^1.0.0
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 ```

@@ -20,15 +20,15 @@ Health Connect does not provide a general push notification for ordinary apps. �
 
 - `health: ^13.3.2` — mature Health Connect/HealthKit adapter with availability checks, granular permissions, range reads, and direct change-token/upsert/delete APIs.
 - `workmanager: ^0.10.10` — Android WorkManager and future iOS background scheduling behind one Dart callback boundary.
-- `flutter_riverpod: ^3.4.3` — dependency injection and reactive status/UI state without coupling widgets to platform plugins.
+- `flutter_riverpod: >=3.3.2 <3.4.0` — dependency injection and reactive status/UI state without coupling widgets to platform plugins. The upper bound keeps the package compatible with Dart 3.11.4.
 - `dio: ^5.11.1` — bounded HTTP timeouts, cancellation, interceptors, and testable transport adapters.
-- `drift: ^2.35.0` and `drift_flutter: ^0.3.1` — typed reactive persistence with a database isolate shared by the UI and WorkManager callback.
+- `drift: >=2.34.0 <2.35.0` and `drift_flutter: ^0.3.1` — typed reactive persistence with a database isolate shared by the UI and WorkManager callback. The range is selected for the pinned Flutter/Dart meta package.
 - `flutter_secure_storage: ^11.2.0` — installation credential and database encryption key storage.
 - `cryptography: ^2.9.0` and `cryptography_flutter: ^2.3.4` — authenticated AES-GCM encryption for pending health payloads.
-- `permission_handler: ^13.0.2` — Android runtime permission/settings handling where Health Connect or activity permissions require it.
+- Health Connect's `health` adapter handles the platform permission and settings surfaces; no generic runtime-permission plugin is required.
 - `url_launcher: ^6.3.2` — open Health Connect settings, Play Store installation/update, and privacy/support surfaces.
 - `path_provider: ^2.1.6` — application database location.
-- Development: `drift_dev`, `build_runner: ^2.16.1`, `flutter_lints: ^6.0.0`, `mocktail`, and Flutter's `integration_test` package.
+- Development: `drift_dev >=2.34.0 <2.35.0`, `build_runner >=2.15.1 <2.16.0`, `flutter_lints: ^6.0.0`, `mocktail`, and Flutter's `integration_test` package. These ranges are the newest solver-compatible set for Dart 3.11.4.
 
 **Storage**: Drift/SQLite in the application support directory, opened with `shareAcrossIsolates: true`. Only encrypted pending health payloads, encrypted cursors, operation metadata, counts, and sanitized errors are persisted. Acknowledged payloads are deleted; the installation credential and AES key are held only in secure storage.
 
