@@ -71,12 +71,22 @@ class _ConnectionPageState extends ConsumerState<ConnectionPage> {
         actions: [
           IconButton(
             tooltip: 'Configure receiving service',
-            onPressed: () => showDialog<void>(
-              context: context,
-              builder: (_) => ApiCredentialDialog(
-                credentialProvider: dependencies.credentialProvider,
-              ),
-            ),
+            onPressed: () async {
+              final saved = await showDialog<bool>(
+                context: context,
+                builder: (_) => ApiCredentialDialog(
+                  credentialProvider: dependencies.credentialProvider,
+                ),
+              );
+              if (saved != true || !context.mounted) return;
+              await controller.refresh();
+              if (dependencies.config.enableAutomaticSync &&
+                  controller.snapshot?.canRead == true) {
+                await dependencies.scheduler.scheduleImmediate(
+                  reason: 'credential_saved',
+                );
+              }
+            },
             icon: const Icon(Icons.key_outlined),
           ),
           IconButton(

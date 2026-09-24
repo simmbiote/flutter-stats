@@ -35,7 +35,7 @@ class _ApiCredentialDialogState extends State<ApiCredentialDialog> {
     });
     try {
       await widget.credentialProvider.writeCredential(value);
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).pop(true);
     } catch (_) {
       if (mounted) {
         setState(() {
