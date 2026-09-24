@@ -239,6 +239,8 @@ The adapter declares only the read permissions required by the selected record c
 
 The periodic task is a polling mechanism, not a promise of exact timing. The UI shows `waiting`/`paused` when Android defers execution. A foreground resume can enqueue an immediate task, but the normal path does not require the user to press a sync button.
 
+Before release, run a background-isolate smoke test on API 28, API 33, and API 34+ and verify that the `health` plugin initializes and maps permission/IPC failures safely inside the WorkManager callback. If that gate fails, replace only the Android source/scheduler adapters with a native Kotlin `CoroutineWorker` behind the same ports; do not fork the domain, persistence, or API layers.
+
 ### Local persistence and encryption
 
 Drift uses a shared database isolate so the WorkManager callback and UI can coordinate safely. The database contains:

@@ -163,4 +163,4 @@ flutter analyze
 flutter test
 ```
 
-Also complete the Health Connect data-use declaration, privacy-policy review, permission-rationale review, secure-storage backup review, and a physical-device test on the supported Samsung hardware. Confirm that logs and crash reports contain no health values or credentials.
+Also complete the Health Connect data-use declaration, privacy-policy review, permission-rationale review, secure-storage backup review, and a physical-device test on the supported Samsung hardware. Run the background-isolate smoke test on API 28, API 33, and API 34+ before release; if `health` cannot initialize or classify native failures safely inside WorkManager, use the native Kotlin `CoroutineWorker` fallback behind `SyncScheduler`. Confirm that logs and crash reports contain no health values or credentials.
