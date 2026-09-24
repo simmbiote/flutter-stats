@@ -20,15 +20,14 @@ From the repository root:
 flutter create --project-name flutter_stats --org com.example --platforms=android,ios .
 flutter pub add health:^13.3.2
 flutter pub add workmanager:^0.10.10
-flutter pub add flutter_riverpod:^3.4.3
+flutter pub add 'flutter_riverpod:>=3.3.2 <3.4.0'
 flutter pub add dio:^5.11.1
-flutter pub add drift:^2.35.0 drift_flutter:^0.3.1
+flutter pub add 'drift:>=2.34.0 <2.35.0' drift_flutter:^0.3.1
 flutter pub add flutter_secure_storage:^11.2.0
 flutter pub add cryptography:^2.9.0 cryptography_flutter:^2.3.4
-flutter pub add permission_handler:^13.0.2
 flutter pub add url_launcher:^6.3.2
 flutter pub add path_provider:^2.1.6
-flutter pub add --dev drift_dev:^2.35.0 build_runner:^2.16.1 flutter_lints:^6.0.0 mocktail:^1.0.0
+flutter pub add --dev 'drift_dev:>=2.34.0 <2.35.0' 'build_runner:>=2.15.1 <2.16.0' flutter_lints:^6.0.0 mocktail:^1.0.0
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
 ```
@@ -50,7 +49,7 @@ Before running the app, verify `android/app/src/main/AndroidManifest.xml` and th
 
 ## Configure a safe test service
 
-Use the test fake or a local mock service for development. The production base URL and installation credential are deployment inputs. A typical non-secret build configuration may provide a base URL and schema version; never place a real token in `pubspec.yaml`, source code, a checked-in `.env`, or test snapshots.
+Use the test fake or a local mock service for development. A local mock service may be paired only with `HEALTH_USE_FAKE_SOURCE=true`; never send real Health Connect records to a local or HTTP endpoint. The production base URL and installation credential are deployment inputs. A typical non-secret build configuration may provide a base URL and schema version; never place a real token in `pubspec.yaml`, source code, a checked-in `.env`, or test snapshots.
 
 The test service must be able to return:
 
@@ -75,8 +74,12 @@ Run the app on a configured Android device:
 
 ```sh
 flutter devices
-flutter run -d <android-device-id>
+flutter run -d <android-device-id> \
+  --dart-define=HEALTH_USE_FAKE_SOURCE=true \
+  --dart-define=HEALTH_USE_FAKE_API=true
 ```
+
+For a real-source permission check, omit the API URL and set `HEALTH_ENABLE_AUTOMATIC_SYNC=false`; do not inspect or transmit health values. For real delivery, use an HTTPS staging endpoint and a staging credential.
 
 ### 1. Health Connect unavailable
 
@@ -163,4 +166,4 @@ flutter analyze
 flutter test
 ```
 
-Also complete the Health Connect data-use declaration, privacy-policy review, permission-rationale review, secure-storage backup review, and a physical-device test on the supported Samsung hardware. Confirm that logs and crash reports contain no health values or credentials.
+Also complete the Health Connect data-use declaration, privacy-policy review, permission-rationale review, secure-storage backup review, and a physical-device test on the supported Samsung hardware. Run the background-isolate smoke test on API 28, API 33, and API 34+ before release; if `health` cannot initialize or classify native failures safely inside WorkManager, use the native Kotlin `CoroutineWorker` fallback behind `SyncScheduler`. Confirm that logs and crash reports contain no health values or credentials.

@@ -1,0 +1,42 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+*.iml
+*.ipr
+*.iws
+
+# Android/Kotlin/Gradle
+.gradle/
+local.properties
+**/build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.jks
+*.keystore
+android/key.properties
+android/app/debug/
+android/app/profile/
+android/app/release/
+
+# IDE/OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Local configuration and secrets
+.env
+.env.*
+*.pem
+*.key
+secrets/

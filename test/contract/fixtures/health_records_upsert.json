@@ -1,0 +1,23 @@
+{
+  "schema_version": "1",
+  "source_platform": "android_health_connect",
+  "operation": "upsert",
+  "records": [
+    {
+      "record_id": "fixture-steps-1",
+      "source_platform": "android_health_connect",
+      "record_type": "steps",
+      "category": "activity",
+      "start_time": "2026-09-24T08:00:00Z",
+      "end_time": "2026-09-24T08:15:00Z",
+      "source_version": "fixture-v1",
+      "source": "Fixture Health Connect",
+      "origin": "unknown",
+      "measurement": {
+        "kind": "numeric",
+        "unit": "count",
+        "value": 100
+      }
+    }
+  ]
+}
