@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Flutter Stats Architecture",
+    "output": "docs/flutter-stats-architecture.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "https://github.com/simmbiote/flutter-stats",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "36a9f1e0abd961c53dbfae3eb19b1aea912db53f"
+    },
+    "viewBox": [1500, 850]
+  },
+  "components": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "User",
+      "tag": "controls",
+      "pos": [30, 300],
+      "size": [120, 70]
+    },
+    {
+      "id": "android-app",
+      "type": "frontend",
+      "label": "Flutter Android app",
+      "tag": "read-only",
+      "sources": [
+        {"path": "lib/features/connection/presentation/connection_page.dart"},
+        {"path": "lib/app/dependencies.dart"}
+      ],
+      "pos": [190, 300],
+      "size": [150, 70]
+    },
+    {
+      "id": "health-source",
+      "type": "backend",
+      "label": "HealthDataSource",
+      "tag": "adapter",
+      "sources": [
+        {"path": "lib/data/health/health_connect_data_source.dart"},
+        {"path": "lib/data/health/permission_catalog.dart"}
+      ],
+      "pos": [400, 300],
+      "size": [150, 70]
+    },
+    {
+      "id": "sync-coordinator",
+      "type": "backend",
+      "label": "SyncCoordinator",
+      "tag": "domain",
+      "sources": [
+        {"path": "lib/features/sync/domain/sync_coordinator.dart"},
+        {"path": "lib/features/sync/domain/models.dart"}
+      ],
+      "pos": [610, 300],
+      "size": [160, 70]
+    },
+    {
+      "id": "outbox",
+      "type": "database",
+      "label": "Encrypted outbox",
+      "tag": "AES-GCM",
+      "sources": [
+        {"path": "lib/data/persistence/sync_repository.dart"},
+        {"path": "lib/data/persistence/encrypted_payload_codec.dart"}
+      ],
+      "pos": [830, 300],
+      "size": [150, 70]
+    },
+    {
+      "id": "api-client",
+      "type": "backend",
+      "label": "Dio API client",
+      "tag": "idempotent",
+      "sources": [
+        {"path": "lib/data/api/receiving_api.dart"},
+        {"path": "lib/data/api/api_mapper.dart"}
+      ],
+      "pos": [1040, 300],
+      "size": [160, 70]
+    },
+    {
+      "id": "receiving-api",
+      "type": "external",
+      "label": "Receiving API",
+      "tag": "Go · HTTPS",
+      "sources": [
+        {"path": "docs/health-records-api.openapi.yaml"},
+        {"path": "specs/001-add-health-connect-sync/contracts/health-records-api.md"}
+      ],
+      "pos": [1260, 300],
+      "size": [160, 70]
+    },
+    {
+      "id": "health-connect",
+      "type": "external",
+      "label": "Health Connect",
+      "tag": "system service",
+      "sources": [
+        {"path": "android/app/src/main/AndroidManifest.xml"},
+        {"path": "lib/data/health/health_connect_data_source.dart"}
+      ],
+      "pos": [400, 100],
+      "size": [150, 70]
+    },
+    {
+      "id": "samsung-health",
+      "type": "external",
+      "label": "Samsung Health",
+      "tag": "origin",
+      "sources": [
+        {"path": "docs/health-data-privacy.md"},
+        {"path": "specs/001-add-health-connect-sync/spec.md"}
+      ],
+      "pos": [610, 100],
+      "size": [160, 70]
+    },
+    {
+      "id": "workmanager",
+      "type": "messagebus",
+      "label": "WorkManager",
+      "tag": "15 min",
+      "sources": [
+        {"path": "lib/background/workmanager_sync_scheduler.dart"},
+        {"path": "lib/background/background_entrypoint.dart"}
+      ],
+      "pos": [610, 540],
+      "size": [160, 70]
+    },
+    {
+      "id": "secure-credentials",
+      "type": "security",
+      "label": "Secure credentials",
+      "tag": "protected",
+      "sources": [
+        {"path": "lib/data/credentials/installation_credential_store.dart"}
+      ],
+      "pos": [1040, 540],
+      "size": [150, 70]
+    },
+    {
+      "id": "mock-api",
+      "type": "external",
+      "label": "Local mock API",
+      "tag": "synthetic only",
+      "sources": [
+        {"path": "tool/mock_health_api.dart"},
+        {"path": "docs/mock-api.md"}
+      ],
+      "pos": [1260, 700],
+      "size": [160, 60]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Android device / app runtime",
+      "wraps": [
+        "android-app",
+        "health-source",
+        "sync-coordinator",
+        "outbox",
+        "api-client",
+        "health-connect",
+        "workmanager",
+        "secure-credentials"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Protected local state",
+      "wraps": ["outbox", "secure-credentials"]
+    },
+    {
+      "kind": "region",
+      "label": "Receiving service",
+      "wraps": ["receiving-api"]
+    }
+  ],
+  "connections": [
+    {
+      "id": "user-to-app",
+      "from": "user",
+      "to": "android-app",
+      "label": "open / grant",
+      "variant": "emphasis",
+      "labelDy": -55
+    },
+    {
+      "id": "app-to-source",
+      "from": "android-app",
+      "to": "health-source",
+      "label": "permission + status",
+      "labelDy": -55
+    },
+    {
+      "id": "source-to-health-connect",
+      "from": "health-source",
+      "to": "health-connect",
+      "label": "read records + changes"
+    },
+    {
+      "id": "samsung-to-health-connect",
+      "from": "samsung-health",
+      "to": "health-connect",
+      "label": "origin data"
+    },
+    {
+      "id": "source-to-coordinator",
+      "from": "health-source",
+      "to": "sync-coordinator",
+      "label": "records + cursors",
+      "labelDy": -55
+    },
+    {
+      "id": "coordinator-to-outbox",
+      "from": "sync-coordinator",
+      "to": "outbox",
+      "label": "encrypt + enqueue",
+      "labelDy": -55
+    },
+    {
+      "id": "outbox-to-api-client",
+      "from": "outbox",
+      "to": "api-client",
+      "label": "pending operations",
+      "labelDy": -55
+    },
+    {
+      "id": "api-client-to-api",
+      "from": "api-client",
+      "to": "receiving-api",
+      "label": "HTTPS POST / ack",
+      "variant": "emphasis",
+      "labelDy": -55
+    },
+    {
+      "id": "app-to-workmanager",
+      "from": "android-app",
+      "to": "workmanager",
+      "label": "schedule"
+    },
+    {
+      "id": "workmanager-to-coordinator",
+      "from": "workmanager",
+      "to": "sync-coordinator",
+      "label": "trigger sync"
+    },
+    {
+      "id": "credentials-to-api-client",
+      "from": "secure-credentials",
+      "to": "api-client",
+      "label": "Bearer credential",
+      "variant": "security",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "api-to-mock",
+      "from": "receiving-api",
+      "to": "mock-api",
+      "label": "synthetic dev branch",
+      "variant": "dashed",
+      "labelDy": 24
+    }
+  ]
+}
