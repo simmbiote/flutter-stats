@@ -59,14 +59,31 @@ class AppDependencies {
     bool useDemo = false,
   }) async {
     final resolvedConfig = config ?? AppConfig.fromEnvironment();
+    if (!useDemo &&
+        !resolvedConfig.useFakeHealthSource &&
+        resolvedConfig.useFakeApi) {
+      throw StateError(
+        'The fake API cannot be used with the real Health Connect source.',
+      );
+    }
+    if (!useDemo &&
+        !resolvedConfig.useFakeHealthSource &&
+        resolvedConfig.hasApiBaseUrl &&
+        !resolvedConfig.apiBaseUrl.trim().startsWith('https://')) {
+      throw StateError(
+        'Real Health Connect data requires an HTTPS receiving service.',
+      );
+    }
     final logger = RedactingLogger(debugEnabled: false);
     final database = AppDatabase();
     await database.customSelect('SELECT 1').get();
     final keyStore = SecureKeyStore();
     final codec = EncryptedPayloadCodec(keyStore: keyStore);
     final store = DriftPendingStore(database: database, codec: codec);
-    final source = useDemo || resolvedConfig.useFakeHealthSource
+    final source = useDemo
         ? FakeHealthDataSource()
+        : resolvedConfig.useFakeHealthSource
+        ? FakeHealthDataSource(granted: true)
         : HealthConnectDataSource();
     final credentialProvider = SecureInstallationCredentialProvider();
     final configuration = ApiConfiguration(
@@ -104,6 +121,7 @@ class AppDependencies {
       store: store,
       scheduler: scheduler,
       statusController: statusController,
+      enableAutomaticSync: resolvedConfig.enableAutomaticSync,
     );
     final coordinator = SyncCoordinator(
       source: source,
@@ -174,6 +192,17 @@ class AppDependencies {
   Future<void> runSync({String trigger = 'manual'}) async {
     statusController.setBusy(true);
     try {
+      if (!config.useFakeHealthSource && !config.useFakeApi) {
+        if (!config.hasApiBaseUrl) {
+          await _reportSyncUnavailable(SyncErrorCategory.notConfigured);
+          return;
+        }
+        final credential = await credentialProvider.readCredential();
+        if (credential == null || credential.trim().isEmpty) {
+          await _reportSyncUnavailable(SyncErrorCategory.missingCredential);
+          return;
+        }
+      }
       await coordinator.run(
         trigger: trigger,
         onStatus: statusController.update,
@@ -183,10 +212,24 @@ class AppDependencies {
     }
   }
 
+  Future<void> _reportSyncUnavailable(SyncErrorCategory category) async {
+    final now = DateTime.now().toUtc();
+    final snapshot = SyncRunSnapshot(
+      receiveState: SyncReceiveState.blocked,
+      sendState: SyncSendState.blocked,
+      startedAt: now,
+      finishedAt: now,
+      pendingCount: await store.countPending(),
+      safeErrorCategory: category,
+    );
+    await store.saveRun(snapshot);
+    statusController.update(snapshot);
+  }
+
   Future<void> initialize() async {
     await connectionController.refresh();
     if (config.enableAutomaticSync &&
-        connectionController.snapshot?.state == ConnectionState.connected) {
+        connectionController.snapshot?.canRead == true) {
       await scheduler.schedulePeriodic();
     }
   }

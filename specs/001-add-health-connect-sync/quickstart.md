@@ -49,7 +49,7 @@ Before running the app, verify `android/app/src/main/AndroidManifest.xml` and th
 
 ## Configure a safe test service
 
-Use the test fake or a local mock service for development. The production base URL and installation credential are deployment inputs. A typical non-secret build configuration may provide a base URL and schema version; never place a real token in `pubspec.yaml`, source code, a checked-in `.env`, or test snapshots.
+Use the test fake or a local mock service for development. A local mock service may be paired only with `HEALTH_USE_FAKE_SOURCE=true`; never send real Health Connect records to a local or HTTP endpoint. The production base URL and installation credential are deployment inputs. A typical non-secret build configuration may provide a base URL and schema version; never place a real token in `pubspec.yaml`, source code, a checked-in `.env`, or test snapshots.
 
 The test service must be able to return:
 
@@ -74,8 +74,12 @@ Run the app on a configured Android device:
 
 ```sh
 flutter devices
-flutter run -d <android-device-id>
+flutter run -d <android-device-id> \
+  --dart-define=HEALTH_USE_FAKE_SOURCE=true \
+  --dart-define=HEALTH_USE_FAKE_API=true
 ```
+
+For a real-source permission check, omit the API URL and set `HEALTH_ENABLE_AUTOMATIC_SYNC=false`; do not inspect or transmit health values. For real delivery, use an HTTPS staging endpoint and a staging credential.
 
 ### 1. Health Connect unavailable
 

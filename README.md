@@ -48,7 +48,7 @@ A dependency-free mock receiving API is included:
 dart run tool/mock_health_api.dart --port 8787
 ```
 
-For a USB-connected Android device, run `adb reverse tcp:8787 tcp:8787`, launch the debug app with `--dart-define=HEALTH_API_BASE_URL=http://127.0.0.1:8787`, and save the development credential `dev-credential` from the in-app key dialog. See [`docs/mock-api.md`](docs/mock-api.md) for request examples and failure scenarios.
+For a USB-connected Android device, run `adb reverse tcp:8787 tcp:8787`, launch the debug app with `--dart-define=HEALTH_USE_FAKE_SOURCE=true --dart-define=HEALTH_API_BASE_URL=http://127.0.0.1:8787`, and save the development credential `dev-credential` from the in-app key dialog. The local mock server must never be paired with the real Health Connect source; use an HTTPS staging service for real-source testing. See [`docs/mock-api.md`](docs/mock-api.md) for request examples and failure scenarios.
 
 ## Validate
 

@@ -29,21 +29,32 @@ It returns a positive acknowledgement such as:
 
 Repeated requests with the same idempotency key and identical body return the original acknowledgement. Reusing a key with a different body returns `409`.
 
-## Connect an Android device
+## Connect an Android device with synthetic data
+
+The local mock server must only be used with the synthetic source. This prevents real Samsung Health records from being sent to a development process.
 
 For a USB-connected device, forward the host port to the phone:
 
 ```sh
 $HOME/Library/Android/sdk/platform-tools/adb reverse tcp:8787 tcp:8787
 flutter run -d <device-id> \
+  --dart-define=HEALTH_USE_FAKE_SOURCE=true \
   --dart-define=HEALTH_API_BASE_URL=http://127.0.0.1:8787
 ```
 
 In the app, open the key icon and securely save `dev-credential`.
 
-The cleartext override exists only in the debug manifest. Release builds continue to reject cleartext traffic and must use HTTPS.
+For a completely in-memory synthetic run, use both fake flags instead:
 
-For a device on the same network, replace `127.0.0.1` with the development machine's LAN address and use the debug build.
+```sh
+flutter run -d <device-id> \
+  --dart-define=HEALTH_USE_FAKE_SOURCE=true \
+  --dart-define=HEALTH_USE_FAKE_API=true
+```
+
+The cleartext override exists only in the debug manifest. Release builds continue to reject cleartext traffic and must use HTTPS. The app also refuses to pair the real Health Connect source with an HTTP endpoint, even in debug builds.
+
+For a real-source device test, use an HTTPS staging endpoint and a staging credential. Do not use the local mock server for real health data. A permission-only check can be run without an API URL and with `HEALTH_ENABLE_AUTOMATIC_SYNC=false`; it must not be used to inspect or transmit health values.
 
 ## Failure scenarios
 

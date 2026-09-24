@@ -122,6 +122,8 @@ class SyncStatusView extends StatelessWidget {
     return switch (category) {
       SyncErrorCategory.missingCredential =>
         'A deployment credential is needed before sending.',
+      SyncErrorCategory.notConfigured =>
+        'Configure an HTTPS receiving service before syncing health data.',
       SyncErrorCategory.authorization =>
         'The receiving service rejected authorization.',
       SyncErrorCategory.permissionDenied =>
